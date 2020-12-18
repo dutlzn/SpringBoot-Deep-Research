@@ -1,0 +1,8 @@
+com\ssm\bean\DemoExample$Criterion.class
+com\ssm\bean\DemoExample.class
+com\ssm\bean\Demo.class
+com\ssm\bean\DemoExample$Criteria.class
+com\ssm\controller\DemoController.class
+com\ssm\mapper\DemoMapper.class
+com\ssm\bean\DemoExample$GeneratedCriteria.class
+com\ssm\service\DemoService.class
