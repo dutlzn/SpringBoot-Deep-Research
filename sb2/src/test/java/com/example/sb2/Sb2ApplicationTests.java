@@ -1,26 +1,52 @@
 package com.example.sb2;
 
+import com.example.sb2.ioc.xml.HelloService;
 import com.example.sb2.event.WeatherRunListener;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-@SpringBootTest
-class Sb2ApplicationTests {
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
 
-    //  注入
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@WebAppConfiguration
+@ContextConfiguration(locations = "classpath:ioc/demo.xml")
+public class Sb2ApplicationTests {
+
     @Autowired
-    private WeatherRunListener weatherRunListener;
+    private HelloService helloService;
+
 
     @Test
-    void contextLoads() {
-
+    public void testHello() {
+        System.out.println(helloService.hello());
     }
 
+//	@Autowired
+//	private WeatherRunListener weatherRunListener;
 
-    @Test
-	public void testEvent() {
-    	weatherRunListener.rain();
-    	weatherRunListener.snow();
-	}
+//
+//	@Before
+//	public void init() {
+//		System.out.println("开始测试-----------------");
+//	}
+//
+//	@After
+//	public void after() {
+//		System.out.println("测试结束-----------------");
+//	}
+//
+//
+//	@Test
+//	public void testEvent() {
+//		weatherRunListener.rain();
+//		weatherRunListener.snow();
+//	}
+
 
 }
