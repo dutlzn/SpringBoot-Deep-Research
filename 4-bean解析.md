@@ -701,3 +701,743 @@ public class AnimalFactory {
 * 开发效率低
 * 文件解析耗时
 
+
+
+# 注解方式配置Bean
+
+* @Component
+* 配置类中使用@Bean
+* 实现FactoryBean
+* 实现BeanDefinitonRegistryPostProcessor
+* 实现ImportBeanDefinitionRegistry
+
+
+
+## @Component
+
+xml里注释掉服务
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="student" class="com.example.sb2.ioc.xml.Student">
+<!--        有参构造函数-->
+        <constructor-arg index="0" value="zhangsan" />
+        <constructor-arg index="1" value="123" />
+<!--        <property name="name" value="zhangsan"/>-->
+<!--        <property name="age" value="13"/>-->
+        <property name="classList" >
+            <list>
+                <value>math</value>
+                <value>english</value>
+            </list>
+        </property>
+    </bean>
+
+
+<!--    <bean id="helloService" class="com.example.sb2.ioc.xml.HelloService">-->
+<!--        <property name="student" ref="student" />-->
+<!--        <property name="animal" ref="dog" />-->
+<!--    </bean>-->
+
+    <bean name="animalFactory" class="com.example.sb2.ioc.xml.AnimalFactory"/>
+
+
+    <bean id="dog" class="com.example.sb2.ioc.xml.AnimalFactory" factory-bean="animalFactory" factory-method="getAnimal">
+        <constructor-arg value="dog" />
+    </bean>
+
+    <bean id="cat" class="com.example.sb2.ioc.xml.AnimalFactory" factory-bean="animalFactory"  factory-method="getAnimal">
+        <constructor-arg value="cat" />
+    </bean>
+
+
+</beans>
+```
+
+
+
+helloservice.java
+
+```java
+package com.example.sb2.ioc.xml;
+
+//public class HelloService {
+//    private Student student;
+//
+//    public Student getStudent() {
+//        return student;
+//    }
+//
+//    public void setStudent(Student student) {
+//        this.student = student;
+//    }
+//
+//    public  String hello() {
+//        return student.toString();
+//    }
+//}
+
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class HelloService {
+    private Student student;
+
+
+    private Animal animal;
+
+
+    public Animal getAnimal() {
+        return animal;
+    }
+
+    public void setAnimal(Animal animal) {
+        this.animal = animal;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public String hello() {
+//        return student.toString();
+        return "hello";
+    }
+
+
+    public String hello2() {
+        return animal.getName();
+    }
+}
+
+```
+
+
+
+
+
+测试类
+
+```java
+package com.example.sb2;
+
+import com.example.sb2.ioc.xml.HelloService;
+import com.example.sb2.event.WeatherRunListener;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@WebAppConfiguration
+//@ContextConfiguration(locations = "classpath:ioc/demo.xml")
+public class Sb2ApplicationTests {
+
+    @Autowired
+    private HelloService helloService;
+
+
+    @Test
+    public void testHello() {
+        System.out.println(helloService.hello());
+//        System.out.println(helloService.hello2());
+    }
+
+//	@Autowired
+//	private WeatherRunListener weatherRunListener;
+
+//
+//	@Before
+//	public void init() {
+//		System.out.println("开始测试-----------------");
+//	}
+//
+//	@After
+//	public void after() {
+//		System.out.println("测试结束-----------------");
+//	}
+//
+//
+//	@Test
+//	public void testEvent() {
+//		weatherRunListener.rain();
+//		weatherRunListener.snow();
+//	}
+
+
+}
+
+```
+
+
+
+启动测试
+
+
+
+
+
+## 在配置类中注入bean
+
+配置类
+
+```java
+
+package com.example.sb2.ioc.ann;
+
+import com.example.sb2.ioc.xml.Animal;
+import com.example.sb2.ioc.xml.Dog;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class BeanConfig {
+    @Bean("dog")
+    Animal getDog() {
+        return new Dog();
+    }
+}
+```
+
+如果配置多个bean就会报错
+
+
+
+修改helloService.java
+
+```java
+package com.example.sb2.ioc.xml;
+
+//public class HelloService {
+//    private Student student;
+//
+//    public Student getStudent() {
+//        return student;
+//    }
+//
+//    public void setStudent(Student student) {
+//        this.student = student;
+//    }
+//
+//    public  String hello() {
+//        return student.toString();
+//    }
+//}
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class HelloService {
+    private Student student;
+
+    @Autowired
+    private Animal animal;
+
+
+    public Animal getAnimal() {
+        return animal;
+    }
+
+    public void setAnimal(Animal animal) {
+        this.animal = animal;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public String hello() {
+//        return student.toString();
+        return "hello";
+    }
+
+
+    public String hello2() {
+        return animal.getName();
+    }
+}
+
+```
+
+
+
+
+
+修改测试类
+
+```java
+package com.example.sb2;
+
+import com.example.sb2.ioc.xml.HelloService;
+import com.example.sb2.event.WeatherRunListener;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@WebAppConfiguration
+//@ContextConfiguration(locations = "classpath:ioc/demo.xml")
+public class Sb2ApplicationTests {
+
+    @Autowired
+    private HelloService helloService;
+
+
+    @Test
+    public void testHello() {
+        System.out.println(helloService.hello());
+        System.out.println(helloService.hello2());
+    }
+
+//	@Autowired
+//	private WeatherRunListener weatherRunListener;
+
+//
+//	@Before
+//	public void init() {
+//		System.out.println("开始测试-----------------");
+//	}
+//
+//	@After
+//	public void after() {
+//		System.out.println("测试结束-----------------");
+//	}
+//
+//
+//	@Test
+//	public void testEvent() {
+//		weatherRunListener.rain();
+//		weatherRunListener.snow();
+//	}
+
+
+}
+
+```
+
+
+
+
+
+## 实现FactoryBean
+
+实现一个FactoryBean
+
+```JAVA
+package com.example.sb2.ioc.ann;
+
+import com.example.sb2.ioc.xml.Animal;
+import com.example.sb2.ioc.xml.Cat;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.stereotype.Component;
+
+@Component("mycat")
+public class MyCat implements FactoryBean<Animal> {
+    @Override
+    public Animal getObject() throws Exception {
+        return new Cat();
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return Animal.class;
+    }
+}
+
+```
+
+
+
+helloService.java
+
+```java
+package com.example.sb2.ioc.xml;
+
+//public class HelloService {
+//    private Student student;
+//
+//    public Student getStudent() {
+//        return student;
+//    }
+//
+//    public void setStudent(Student student) {
+//        this.student = student;
+//    }
+//
+//    public  String hello() {
+//        return student.toString();
+//    }
+//}
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+@Component
+public class HelloService {
+    private Student student;
+
+    @Autowired
+    @Qualifier("mycat")
+    private Animal animal;
+
+
+    public Animal getAnimal() {
+        return animal;
+    }
+
+    public void setAnimal(Animal animal) {
+        this.animal = animal;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public String hello() {
+//        return student.toString();
+        return "hello";
+    }
+
+
+    public String hello2() {
+        return animal.getName();
+    }
+}
+
+```
+
+
+
+
+
+## 实现BeanDefinitonRegistryPostProcessor
+
+定义Monkey
+
+```java
+package com.example.sb2.ioc.xml;
+
+import com.example.sb2.ioc.xml.Animal;
+
+public class Monkey extends Animal {
+    @Override
+    String getName() {
+        return "monkey";
+    }
+}
+
+```
+
+
+
+
+
+```java
+package com.example.sb2.ioc.ann;
+
+import com.example.sb2.ioc.xml.Monkey;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MyBeanRegister implements BeanDefinitionRegistryPostProcessor {
+    @Override
+    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {
+        RootBeanDefinition rootBeanDefinition = new RootBeanDefinition();
+        rootBeanDefinition.setBeanClass(Monkey.class);
+        beanDefinitionRegistry.registerBeanDefinition("monkey", rootBeanDefinition);
+    }
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
+
+    }
+}
+
+```
+
+
+
+
+
+修改服务类
+
+```java
+package com.example.sb2.ioc.xml;
+
+//public class HelloService {
+//    private Student student;
+//
+//    public Student getStudent() {
+//        return student;
+//    }
+//
+//    public void setStudent(Student student) {
+//        this.student = student;
+//    }
+//
+//    public  String hello() {
+//        return student.toString();
+//    }
+//}
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+@Component
+public class HelloService {
+    private Student student;
+
+    @Autowired
+    @Qualifier("monkey")
+    private Animal animal;
+
+
+    public Animal getAnimal() {
+        return animal;
+    }
+
+    public void setAnimal(Animal animal) {
+        this.animal = animal;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public String hello() {
+//        return student.toString();
+        return "hello";
+    }
+
+
+    public String hello2() {
+        return animal.getName();
+    }
+}
+```
+
+
+
+## 实现ImportBeanDefinitionRegistry
+
+```
+package com.example.sb2.ioc.xml;
+
+public class Bird extends Animal{
+    @Override
+    String getName() {
+        return "bird";
+    }
+}
+```
+
+
+
+
+
+
+
+```
+package com.example.sb2.ioc.ann;
+
+import com.example.sb2.ioc.xml.Bird;
+import com.example.sb2.ioc.xml.Monkey;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.type.AnnotationMetadata;
+
+public class MyBeanImport implements ImportBeanDefinitionRegistrar {
+    @Override
+    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
+        RootBeanDefinition rootBeanDefinition = new RootBeanDefinition();
+        rootBeanDefinition.setBeanClass(Bird.class);
+        registry.registerBeanDefinition("bird", rootBeanDefinition);
+    }
+}
+```
+
+
+
+```
+package com.example.sb2.ioc.xml;
+
+//public class HelloService {
+//    private Student student;
+//
+//    public Student getStudent() {
+//        return student;
+//    }
+//
+//    public void setStudent(Student student) {
+//        this.student = student;
+//    }
+//
+//    public  String hello() {
+//        return student.toString();
+//    }
+//}
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+@Component
+public class HelloService {
+    private Student student;
+
+    @Autowired
+    @Qualifier("bird")
+    private Animal animal;
+
+
+    public Animal getAnimal() {
+        return animal;
+    }
+
+    public void setAnimal(Animal animal) {
+        this.animal = animal;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public String hello() {
+//        return student.toString();
+        return "hello";
+    }
+
+
+    public String hello2() {
+        return animal.getName();
+    }
+}
+```
+
+
+
+
+
+修改测试类
+
+```java
+package com.example.sb2;
+
+import com.example.sb2.ioc.ann.MyBeanImport;
+import com.example.sb2.ioc.xml.HelloService;
+import com.example.sb2.event.WeatherRunListener;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@WebAppConfiguration
+@Import(MyBeanImport.class)
+//@ContextConfiguration(locations = "classpath:ioc/demo.xml")
+public class Sb2ApplicationTests {
+
+    @Autowired
+    private HelloService helloService;
+
+
+    @Test
+    public void testHello() {
+        System.out.println(helloService.hello());
+        System.out.println(helloService.hello2());
+    }
+
+// @Autowired
+// private WeatherRunListener weatherRunListener;
+
+//
+// @Before
+// public void init() {
+//    System.out.println("开始测试-----------------");
+// }
+//
+// @After
+// public void after() {
+//    System.out.println("测试结束-----------------");
+// }
+//
+//
+// @Test
+// public void testEvent() {
+//    weatherRunListener.rain();
+//    weatherRunListener.snow();
+// }
+
+
+}
+```
+
+优点：
+
+* 使用简单
+* 开发效率高
+* 高内聚
+
+缺点
+
+* 配置分散
+* 对象关系不清晰
+* 配置修改需要重新编译工程

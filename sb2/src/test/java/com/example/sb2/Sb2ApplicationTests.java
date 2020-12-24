@@ -1,5 +1,6 @@
 package com.example.sb2;
 
+import com.example.sb2.ioc.ann.MyBeanImport;
 import com.example.sb2.ioc.xml.HelloService;
 import com.example.sb2.event.WeatherRunListener;
 import org.junit.After;
@@ -8,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -15,7 +17,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @WebAppConfiguration
-@ContextConfiguration(locations = "classpath:ioc/demo.xml")
+@Import(MyBeanImport.class)
+//@ContextConfiguration(locations = "classpath:ioc/demo.xml")
 public class Sb2ApplicationTests {
 
     @Autowired

@@ -17,11 +17,16 @@ package com.example.sb2.ioc.xml;
 //}
 
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
+@Component
 public class HelloService {
     private Student student;
 
-
+    @Autowired
+    @Qualifier("bird")
     private Animal animal;
 
 
@@ -42,8 +47,10 @@ public class HelloService {
     }
 
     public String hello() {
-        return student.toString();
+//        return student.toString();
+        return "hello";
     }
+
 
     public String hello2() {
         return animal.getName();

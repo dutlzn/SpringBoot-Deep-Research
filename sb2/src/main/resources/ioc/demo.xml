@@ -18,10 +18,10 @@
     </bean>
 
 
-    <bean id="helloService" class="com.example.sb2.ioc.xml.HelloService">
-        <property name="student" ref="student" />
-        <property name="animal" ref="dog" />
-    </bean>
+<!--    <bean id="helloService" class="com.example.sb2.ioc.xml.HelloService">-->
+<!--        <property name="student" ref="student" />-->
+<!--        <property name="animal" ref="dog" />-->
+<!--    </bean>-->
 
     <bean name="animalFactory" class="com.example.sb2.ioc.xml.AnimalFactory"/>
 
