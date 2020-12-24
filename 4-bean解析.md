@@ -353,3 +353,351 @@ public class Student {
 
 ```
 
+
+
+修改xml文件
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="student" class="com.example.sb2.ioc.xml.Student">
+<!--        有参构造函数-->
+        <constructor-arg index="0" value="zhangsan" />
+        <constructor-arg index="1" value="123" />
+<!--        <property name="name" value="zhangsan"/>-->
+<!--        <property name="age" value="13"/>-->
+        <property name="classList" >
+            <list>
+                <value>math</value>
+                <value>english</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="helloService" class="com.example.sb2.ioc.xml.HelloService">
+        <property name="student" ref="student" />
+    </bean>
+
+</beans>
+
+```
+
+
+
+启动测试类
+
+没问题
+
+
+
+
+
+## 静态工厂方法
+
+```
+package com.example.sb2.ioc.xml;
+
+public abstract  class Animal {
+    abstract  String getName();
+}
+```
+
+
+
+
+
+```
+package com.example.sb2.ioc.xml;
+
+public class Cat extends Animal{
+    @Override
+    String getName() {
+        return "cat";
+    }
+}
+```
+
+
+
+```
+package com.example.sb2.ioc.xml;
+
+public class Dog extends Animal{
+    @Override
+    String getName() {
+        return "dog";
+    }
+}
+```
+
+
+
+
+
+```
+package com.example.sb2.ioc.xml;
+
+public class AnimalFactory {
+    public static Animal getAnimal(String type) {
+        if("dog".equals(type)){
+            return new Dog();
+        } else {
+           return new Cat();
+        }
+    }
+}
+```
+
+
+
+修改helloService.java
+
+```java
+package com.example.sb2.ioc.xml;
+
+//public class HelloService {
+//    private Student student;
+//
+//    public Student getStudent() {
+//        return student;
+//    }
+//
+//    public void setStudent(Student student) {
+//        this.student = student;
+//    }
+//
+//    public  String hello() {
+//        return student.toString();
+//    }
+//}
+
+
+
+public class HelloService {
+    private Student student;
+
+
+    private Animal animal;
+
+
+    public Animal getAnimal() {
+        return animal;
+    }
+
+    public void setAnimal(Animal animal) {
+        this.animal = animal;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public String hello() {
+        return student.toString();
+    }
+
+    public String hello2() {
+        return animal.getName();
+    }
+}
+
+```
+
+
+
+
+
+xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="student" class="com.example.sb2.ioc.xml.Student">
+<!--        有参构造函数-->
+        <constructor-arg index="0" value="zhangsan" />
+        <constructor-arg index="1" value="123" />
+<!--        <property name="name" value="zhangsan"/>-->
+<!--        <property name="age" value="13"/>-->
+        <property name="classList" >
+            <list>
+                <value>math</value>
+                <value>english</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean id="helloService" class="com.example.sb2.ioc.xml.HelloService">
+        <property name="student" ref="student" />
+        <property name="animal" ref="dog" />
+    </bean>
+
+    <bean id="dog" class="com.example.sb2.ioc.xml.AnimalFactory" factory-method="getAnimal">
+        <constructor-arg value="dog" />
+    </bean>
+
+    <bean id="cat" class="com.example.sb2.ioc.xml.AnimalFactory" factory-method="getAnimal">
+        <constructor-arg value="cat" />
+    </bean>
+
+
+</beans>
+
+```
+
+
+
+
+
+测试类
+
+```java
+package com.example.sb2;
+
+import com.example.sb2.ioc.xml.HelloService;
+import com.example.sb2.event.WeatherRunListener;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@WebAppConfiguration
+@ContextConfiguration(locations = "classpath:ioc/demo.xml")
+public class Sb2ApplicationTests {
+
+    @Autowired
+    private HelloService helloService;
+
+
+    @Test
+    public void testHello() {
+        System.out.println(helloService.hello());
+        System.out.println(helloService.hello2());
+    }
+
+//	@Autowired
+//	private WeatherRunListener weatherRunListener;
+
+//
+//	@Before
+//	public void init() {
+//		System.out.println("开始测试-----------------");
+//	}
+//
+//	@After
+//	public void after() {
+//		System.out.println("测试结束-----------------");
+//	}
+//
+//
+//	@Test
+//	public void testEvent() {
+//		weatherRunListener.rain();
+//		weatherRunListener.snow();
+//	}
+
+
+}
+
+```
+
+
+
+
+
+## 实例工厂方法
+
+改造AnimalFactory
+
+```java
+package com.example.sb2.IOC.xml;
+
+public class AnimalFactory {
+    public  Animal getAnimal(String type) {
+        if("dog".equals(type)){
+            return new Dog();
+        } else {
+            return new Cat();
+        }
+    }
+}
+
+```
+
+
+
+修改demo.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="student" class="com.example.sb2.ioc.xml.Student">
+<!--        有参构造函数-->
+        <constructor-arg index="0" value="zhangsan" />
+        <constructor-arg index="1" value="123" />
+<!--        <property name="name" value="zhangsan"/>-->
+<!--        <property name="age" value="13"/>-->
+        <property name="classList" >
+            <list>
+                <value>math</value>
+                <value>english</value>
+            </list>
+        </property>
+    </bean>
+
+
+    <bean id="helloService" class="com.example.sb2.ioc.xml.HelloService">
+        <property name="student" ref="student" />
+        <property name="animal" ref="dog" />
+    </bean>
+
+    <bean name="animalFactory" class="com.example.sb2.ioc.xml.AnimalFactory"/>
+
+
+    <bean id="dog" class="com.example.sb2.ioc.xml.AnimalFactory" factory-bean="animalFactory" factory-method="getAnimal">
+        <constructor-arg value="dog" />
+    </bean>
+
+    <bean id="cat" class="com.example.sb2.ioc.xml.AnimalFactory" factory-bean="animalFactory"  factory-method="getAnimal">
+        <constructor-arg value="cat" />
+    </bean>
+
+
+</beans>
+
+```
+
+
+
+优点：
+
+* 低耦合
+* 对象关系比较清晰 通过xml 知道哪些类有依赖关系
+* 集中管理
+
+缺点：
+
+* 配置繁琐
+* 开发效率低
+* 文件解析耗时
+

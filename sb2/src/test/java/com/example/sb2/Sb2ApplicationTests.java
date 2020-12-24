@@ -25,6 +25,7 @@ public class Sb2ApplicationTests {
     @Test
     public void testHello() {
         System.out.println(helloService.hello());
+        System.out.println(helloService.hello2());
     }
 
 //	@Autowired
