@@ -18,11 +18,16 @@ public class FirstInitializer implements
     public void initialize(ConfigurableApplicationContext applicationContext) {
         // 获得环境
         ConfigurableEnvironment environment = applicationContext.getEnvironment();
-        Map<String,Object> map = new HashMap<>();
-        map.put("key1", "value1");
-        // map打包成一个属性
-        MapPropertySource mapPropertySource = new MapPropertySource("firstInitializer", map);
-        environment.getPropertySources().addLast(mapPropertySource);
-        System.out.println("******** Run FirstInitializer ******** ");
+
+//        Map<String,Object> map = new HashMap<>();
+//        map.put("key1", "value1");
+//        // map打包成一个属性
+//        MapPropertySource mapPropertySource = new MapPropertySource("firstInitializer", map);
+//        environment.getPropertySources().addLast(mapPropertySource);
+//        System.out.println("******** Run FirstInitializer ******** ");
+
+
+//        设置必备属性
+        environment.setRequiredProperties("WUDI");
     }
 }

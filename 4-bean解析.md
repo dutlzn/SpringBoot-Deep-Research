@@ -1,4 +1,5 @@
 ---
+
 typora-root-url: /images
 ---
 
@@ -1441,3 +1442,650 @@ public class Sb2ApplicationTests {
 * 配置分散
 * 对象关系不清晰
 * 配置修改需要重新编译工程
+
+
+
+
+
+# refresh方法
+
+* bean配置读取配加载入口
+* spring框架启动流程
+* 面试重点
+
+
+
+![](/43.png)
+
+
+
+
+
+启动类
+
+```
+package com.example.sb2;
+
+import com.example.sb2.initializer.SecondInitializer;
+import com.example.sb2.listener.SecondListener;
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+@MapperScan("com.example.sb2.mapper")
+public class Sb2Application {
+
+   public static void main(String[] args) {
+      SpringApplication.run(Sb2Application.class, args);
+
+//    第二种自定义初始化器
+//    SpringApplication springApplication = new SpringApplication(Sb2Application.class);
+//    springApplication.addInitializers(new SecondInitializer());
+//    springApplication.run(args);
+
+//    // 自定义监听器
+//    SpringApplication springApplication = new SpringApplication(Sb2Application.class);
+//    springApplication.addListeners(new SecondListener());
+//    springApplication.run(args);
+   }
+
+}
+```
+
+
+
+run方法 一直点
+
+```java
+/**
+ * Run the Spring application, creating and refreshing a new
+ * {@link ApplicationContext}.
+ * @param args the application arguments (usually passed from a Java main method)
+ * @return a running {@link ApplicationContext}
+ */
+public ConfigurableApplicationContext run(String... args) {
+   StopWatch stopWatch = new StopWatch();
+   stopWatch.start();
+   ConfigurableApplicationContext context = null;
+   Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
+   configureHeadlessProperty();
+   SpringApplicationRunListeners listeners = getRunListeners(args);
+   listeners.starting();
+   try {
+      ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
+      ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
+      configureIgnoreBeanInfo(environment);
+      Banner printedBanner = printBanner(environment);
+      context = createApplicationContext();
+      exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
+            new Class[] { ConfigurableApplicationContext.class }, context);
+      prepareContext(context, environment, listeners, applicationArguments, printedBanner);
+       // 看这个方法
+      refreshContext(context);
+      afterRefresh(context, applicationArguments);
+      stopWatch.stop();
+      if (this.logStartupInfo) {
+         new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), stopWatch);
+      }
+      listeners.started(context);
+      callRunners(context, applicationArguments);
+   }
+   catch (Throwable ex) {
+      handleRunFailure(context, ex, exceptionReporters, listeners);
+      throw new IllegalStateException(ex);
+   }
+
+   try {
+      listeners.running(context);
+   }
+   catch (Throwable ex) {
+      handleRunFailure(context, ex, exceptionReporters, null);
+      throw new IllegalStateException(ex);
+   }
+   return context;
+}
+```
+
+
+
+refreshContext
+
+
+
+```
+private void refreshContext(ConfigurableApplicationContext context) {
+   if (this.registerShutdownHook) {
+      try {
+         context.registerShutdownHook();
+      }
+      catch (AccessControlException ex) {
+         // Not allowed in some environments.
+      }
+   }
+   refresh((ApplicationContext) context);
+}
+```
+
+
+
+https://www.jianshu.com/p/d430c6f07566
+
+https://blog.csdn.net/weixin_43960292/article/details/105385441
+
+
+
+refresh 接口 的实现
+
+```java
+protected void refresh(ApplicationContext applicationContext) {
+    Assert.isInstanceOf(AbstractApplicationContext.class, applicationContext);
+    //调用创建的容器applicationContext中的refresh()方法
+    ((AbstractApplicationContext) applicationContext).refresh();
+}
+
+public abstract class AbstractApplicationContext extends DefaultResourceLoader
+        implements ConfigurableApplicationContext { 
+    @Override
+    public void refresh() throws BeansException, IllegalStateException {
+        synchronized (this.startupShutdownMonitor) {
+            // Prepare this context for refreshing.
+            /**
+             * 刷新上下文环境
+             * 容器状态设置
+             * 初始化属性设置
+             * 检查必备属性是否存在
+             */
+            prepareRefresh();
+
+            // Tell the subclass to refresh the internal bean factory.
+            /**
+             * 设置beanFactory序列化id
+             * 获取BeanFactory；默认实现是DefaultListableBeanFactory，在创建容器的时候创建的
+             */
+            ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+            // Prepare the bean factory for use in this context.
+            /**
+             * //BeanFactory的预准备工作
+             * BeanFactory进行一些设置，比如context的类加载器，BeanPostProcessor和XXXAware自动装配等
+             * 设置忽略的自动装配接口，以及注册一些组件
+             */
+            prepareBeanFactory(beanFactory);
+
+            try {
+                // Allows post-processing of the bean factory in context subclasses.
+                /**
+                 * 提供子类覆盖的额外处理，即子类处理自定义的BeanFactoryPostProcess
+                 */
+                postProcessBeanFactory(beanFactory);
+
+                // Invoke factory processors registered as beans in the context.
+                /**
+                 * 激活各种BeanFactory处理器,包括BeanDefinitionRegistryBeanFactoryPostProcessor和普通的BeanFactoryPostProcessor
+                 * 执行对应的postProcessBeanDefinitionRegistry方法 和 postProcessBeanFactory方法
+                 * 调用BeanDefinitionRegistryBeanFactoryPostProcessor实现向容器内添加bean的定义
+                 * 调用BeanFactoryPostProcessor实现向容器内bean的定义添加属性
+                 */
+                invokeBeanFactoryPostProcessors(beanFactory);
+
+                // Register bean processors that intercept bean creation.
+                /**
+                 * 注册拦截Bean创建的Bean处理器，即注册BeanPostProcessor，不是BeanFactoryPostProcessor，注意两者的区别
+                 * 注意，这里仅仅是排序后注册，并不会执行对应的方法，将在bean的实例化时执行对应的方法
+                 */
+                registerBeanPostProcessors(beanFactory);
+
+                // Initialize message source for this context.
+                /**
+                 * 初始化MessageSource组件（做国际化功能；消息绑定，消息解析）；
+                 */
+                initMessageSource();
+
+                // Initialize event multicaster for this context.
+                /**
+                 * 初始化上下文事件广播器，并放入applicatioEventMulticaster,如ApplicationEventPublisher
+                 */
+                initApplicationEventMulticaster();
+
+                // Initialize other special beans in specific context subclasses.
+                /**
+                 * 子类重写这个方法，在容器刷新的时候可以自定义逻辑；如创建Tomcat，Jetty等WEB服务器
+                 */
+                onRefresh();
+
+                // Check for listener beans and register them.
+                /**
+                 * 注册应用的监听器。就是注册实现了ApplicationListener接口的监听器bean，
+                 * 这些监听器是注册到ApplicationEventMulticaster中的
+                 */
+                registerListeners();
+
+                // Instantiate all remaining (non-lazy-init) singletons.
+                /**
+                 * 初始化所有剩下的非懒加载的单例bean
+                 */
+                finishBeanFactoryInitialization(beanFactory);
+
+                // Last step: publish corresponding event.
+                /**
+                 * 完成context的刷新，初始化生命周期处理器，调用LifecycleProcessor的onRefresh()方法，
+                 * 并且发布事件（ContextRefreshedEvent）
+                 */
+                finishRefresh();
+            }
+
+            catch (BeansException ex) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Exception encountered during context initialization - " +
+                            "cancelling refresh attempt: " + ex);
+                }
+
+                // Destroy already created singletons to avoid dangling resources.
+                destroyBeans();
+
+                // Reset 'active' flag.
+                cancelRefresh(ex);
+
+                // Propagate exception to caller.
+                throw ex;
+            }
+
+            finally {
+                // Reset common introspection caches in Spring's core, since we
+                // might not ever need metadata for singleton beans anymore...
+                resetCommonCaches();
+            }
+        }
+    }
+}
+```
+
+
+
+## prepareRefresh
+
+```java
+
+	/**
+	 * Prepare this context for refreshing, setting its startup date and
+	 * active flag as well as performing any initialization of property sources.
+	 */
+	protected void prepareRefresh() {
+		// Switch to active.
+        // 记录启动时间，
+    	// 将 active 属性设置为 true，closed 属性设置为 false，它们都是 AtomicBoolean 类型
+		this.startupDate = System.currentTimeMillis();
+		this.closed.set(false);
+		this.active.set(true);
+
+		if (logger.isDebugEnabled()) {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Refreshing " + this);
+			}
+			else {
+				logger.debug("Refreshing " + getDisplayName());
+			}
+		}
+
+		// Initialize any placeholder property sources in the context environment.
+		initPropertySources();
+
+		// Validate that all properties marked as required are resolvable:
+		// see ConfigurablePropertyResolver#setRequiredProperties
+		getEnvironment().validateRequiredProperties();
+
+		// Store pre-refresh ApplicationListeners...
+		if (this.earlyApplicationListeners == null) {
+			this.earlyApplicationListeners = new LinkedHashSet<>(this.applicationListeners);
+		}
+		else {
+			// Reset local application listeners to pre-refresh state.
+			this.applicationListeners.clear();
+			this.applicationListeners.addAll(this.earlyApplicationListeners);
+		}
+
+		// Allow for the collection of early ApplicationEvents,
+		// to be published once the multicaster is available...
+		this.earlyApplicationEvents = new LinkedHashSet<>();
+	}
+```
+
+1.容器状态的设置。
+2.初始化属性的设置。
+3.检查必备属性是否存在。
+
+
+
+设置必备属性
+
+修改firstInitializer
+
+```JAVA
+package com.example.sb2.initializer;
+
+import org.springframework.context.ApplicationContextInitializer;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MapPropertySource;
+
+import java.util.*;
+
+
+// 定义Spring IOC容器中Bean的执行顺序的优先级，而不是定义Bean的加载顺序
+@Order(1)
+public class FirstInitializer implements
+        ApplicationContextInitializer<ConfigurableApplicationContext> {
+
+    @Override
+    public void initialize(ConfigurableApplicationContext applicationContext) {
+        // 获得环境
+        ConfigurableEnvironment environment = applicationContext.getEnvironment();
+
+//        Map<String,Object> map = new HashMap<>();
+//        map.put("key1", "value1");
+//        // map打包成一个属性
+//        MapPropertySource mapPropertySource = new MapPropertySource("firstInitializer", map);
+//        environment.getPropertySources().addLast(mapPropertySource);
+//        System.out.println("******** Run FirstInitializer ******** ");
+
+
+//        设置必备属性
+        environment.setRequiredProperties("WUDI");
+    }
+}
+```
+
+
+
+属性配置文件：
+
+```
+server.port=8081
+spring.datasource.username=root
+spring.datasource.password=123456
+spring.datasource.url=jdbc:mysql://192.168.56.101:3306/test
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+mybatis.mapper-locations=classpath:mapper/*.xml
+mybatis.type-aliases-package=com.example.sb2.bean
+mybatis.configuration.map-underscore-to-camel-case=true
+
+# 初始化器配置
+context.initializer.classes=com.example.sb2.initializer.ThirdInitializer
+# 自定义监听器
+context.listener.classes=com.example.sb2.listener.ThirdListener
+
+WUDI=test
+```
+
+
+
+就可以正常启动了 
+
+获取BeanFactory
+
+##  obtainFreshBeanFactory
+
+```
+obtainFreshBeanFactory
+```
+
+* 设置beanFactory序列化id
+* 获取beanFactory
+
+## prepareBeanFactory
+
+* 设置beanFactory一些属性
+* 添加后置处理器
+* 设置忽略的自动装配接口
+* 注册一些组件
+
+## postProcessBeanFactory
+
+```java
+@Override
+protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+   super.postProcessBeanFactory(beanFactory);
+   if (!ObjectUtils.isEmpty(this.basePackages)) {
+      this.scanner.scan(this.basePackages);
+   }
+   if (!this.annotatedClasses.isEmpty()) {
+      this.reader.register(ClassUtils.toClassArray(this.annotatedClasses));
+   }
+}
+```
+
+
+
+* 子类重写以在 beanFactory完成创建之后做进一步设置 
+
+  
+
+## invokeBeanFactoryPostProcessors
+
+invokeBeanFactoryPostProcessors步骤：
+
+
+
+![](/44.png)
+
+
+
+
+
+![](/45.png)
+
+
+
+![](/46.PNG)
+
+
+
+
+
+![](/47.PNG)
+
+属性注入
+
+
+
+```java
+package com.example.sb2.ioc.ann;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class Teacher {
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {java
+        this.name = name;
+    }
+}
+```
+
+
+
+
+
+```java
+package com.example.sb2.ioc.ann;                                                                                                                               
+
+import org.springframework.beans.BeansException;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MyBeanFactoryPostprocessor implements BeanFactoryPostProcessor {
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        BeanDefinition teacher = beanFactory.getBeanDefinition("teacher");
+        MutablePropertyValues propertyValues = teacher.getPropertyValues();
+        propertyValues.addPropertyValue("name" ,"wangwu");
+    }
+}
+```
+
+
+
+
+
+ 
+
+有bug
+
+测试类
+
+```java
+package com.example.sb2;
+
+import com.example.sb2.ioc.ann.MyBeanImport;
+import com.example.sb2.ioc.ann.Teacher;
+import com.example.sb2.ioc.xml.HelloService;
+import com.example.sb2.event.WeatherRunListener;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@WebAppConfiguration
+@Import(MyBeanImport.class)
+//@ContextConfiguration(locations = "classpath:ioc/demo.xml")
+public class Sb2ApplicationTests {
+
+    @Autowired
+    private HelloService helloService;
+
+
+    @Test
+    public void contextLoads() {
+
+    }
+
+    @Autowired
+    private Teacher teacher;
+//
+//    @Test
+//    public void testHello() {
+//        System.out.println(helloService.hello());
+//        System.out.println(helloService.hello2());
+//    }
+
+    @Test
+    public void testName() {
+        System.out.println(teacher.getName());
+    }
+
+
+
+//	@Autowired
+//	private WeatherRunListener weatherRunListener;
+
+//
+//	@Before
+//	public void init() {
+//		System.out.println("开始测试-----------------");
+//	}
+//
+//	@After
+//	public void after() {
+//		System.out.println("测试结束-----------------");
+//	}
+//
+//
+//	@Test
+//	public void testEvent() {
+//		weatherRunListener.rain();
+//		weatherRunListener.snow();
+//	}
+
+
+}
+
+```
+
+
+
+启动可以输出信息
+
+**invokeBeanFactoryPostProcessors**
+
+* 调用BeanDefinitionRegistryPostProcessor实现向容器内添加bean的定义
+* 调用BeanFactoryPostProcessor实现向容器内bean的定义的添加属性
+
+## registerBeanPostProcessors
+
+```
+// Register bean processors that intercept bean creation.
+registerBeanPostProcessors(beanFactory);
+```
+
+
+
+* 找到**BeanPostProcessor**的实现
+* 排序后注册进容器内
+
+
+
+## initMessageSource
+
+* 初始化国际化相关属性
+
+## initApplicationEventMulticaster
+
+* 初始化事件广播器
+
+## onRefresh
+
+空实现，留给子类去继承
+
+* 创建web容器
+
+## registerListeners
+
+
+
+* 添加容器内事件监听器至广播器中
+* 派发早期事件
+
+## finishBeanFactoryInitialization
+
+参考链接：https://blog.csdn.net/qq_44836294/article/details/107795639
+
+
+
+* 初始化所有剩下的单实例Bean
+
+## finishRefresh
+
+* 初始化生命周期处理器
+* 调用生命周期处理器onRfresh方法
+* 发布ContextRrefreshredEvent事件、
+* JMX相关处理
+
+最后完成对上述操作缓存的清理工作
+
+
+
+reFresh是spring容器的一个核心方法
+
+
+
+# Bean实例化解析
+

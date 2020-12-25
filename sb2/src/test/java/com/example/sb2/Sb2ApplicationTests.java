@@ -1,6 +1,7 @@
 package com.example.sb2;
 
 import com.example.sb2.ioc.ann.MyBeanImport;
+import com.example.sb2.ioc.ann.Teacher;
 import com.example.sb2.ioc.xml.HelloService;
 import com.example.sb2.event.WeatherRunListener;
 import org.junit.After;
@@ -26,10 +27,25 @@ public class Sb2ApplicationTests {
 
 
     @Test
-    public void testHello() {
-        System.out.println(helloService.hello());
-        System.out.println(helloService.hello2());
+    public void contextLoads() {
+
     }
+
+    @Autowired
+    private Teacher teacher;
+//
+//    @Test
+//    public void testHello() {
+//        System.out.println(helloService.hello());
+//        System.out.println(helloService.hello2());
+//    }
+
+    @Test
+    public void testName() {
+        System.out.println(teacher.getName());
+    }
+
+
 
 //	@Autowired
 //	private WeatherRunListener weatherRunListener;
