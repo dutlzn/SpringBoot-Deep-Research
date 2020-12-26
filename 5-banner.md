@@ -275,7 +275,83 @@ Banner print(Environment environment, Class<?> sourceClass, PrintStream out) {
 
 # Banner内容输出原理解析
 
+看 SpringBootBanner
+
+```java
+@Override
+public void printBanner(Environment environment, Class<?> sourceClass, PrintStream printStream) {
+   for (String line : BANNER) {
+      printStream.println(line);
+   }
+   String version = SpringBootVersion.getVersion();
+   version = (version != null) ? " (v" + version + ")" : "";
+   StringBuilder padding = new StringBuilder();
+   while (padding.length() < STRAP_LINE_SIZE - (version.length() + SPRING_BOOT.length())) {
+      padding.append(" ");
+   }
+
+   printStream.println(AnsiOutput.toString(AnsiColor.GREEN, SPRING_BOOT, AnsiColor.DEFAULT, padding.toString(),
+         AnsiStyle.FAINT, version));
+   printStream.println();
+}
+```
+
+
+
+
+
+![](/52.png)
+
+
+
+
+
+
+
+## 默认输出
+
+* 先输出banner指定内容
+* 获取version信息
+* 文本内容前后对齐
+* 文本内容染色
+* 输出文本内容
+
+
+
+
+
+## 文本输出
+
+* 可以通过spring.banner.charset指定字符集
+* 获取文本内容
+* 替换占位符
+* 输出文本内容
+
+## 图片输出
+
+* 可以通过spring.banner.image.*设置图片属性
+* 读取图片文件流
+* 输出图片内容
+
+
+
+
+
 
 
 # 总结
+
+
+
+## 面试题
+
+
+
+* 举例banner常见配置方式
+* 简述下框架内banner打印流程步骤
+* 说明下banner获取原理
+* 说明下banner输出原理
+* 说出你熟悉的banner属性有哪些
+
+
 
