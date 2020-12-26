@@ -26,7 +26,7 @@ public class HelloService {
     private Student student;
 
     @Autowired
-    @Qualifier("bird")
+    @Qualifier("monkey")
     private Animal animal;
 
 
