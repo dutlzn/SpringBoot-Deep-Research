@@ -11,7 +11,7 @@ import org.springframework.core.io.ClassPathResource;
 public class Sb2Application {
 
 	public static void main(String[] args) {
-//		SpringApplication.run(Sb2Application.class, args);
+		SpringApplication.run(Sb2Application.class, args);
 
 //		第二种自定义初始化器
 //		SpringApplication springApplication = new SpringApplication(Sb2Application.class);
@@ -25,9 +25,9 @@ public class Sb2Application {
 
 
 //		自定义加载banner
-		SpringApplication springApplication = new SpringApplication(Sb2Application.class);
-		springApplication.setBanner(new ResourceBanner(new ClassPathResource("banner_bak.txt")));
-		springApplication.run(args);
+//		SpringApplication springApplication = new SpringApplication(Sb2Application.class);
+//		springApplication.setBanner(new ResourceBanner(new ClassPathResource("banner_bak.txt")));
+//		springApplication.run(args);
 	}
 
 }

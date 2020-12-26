@@ -134,3 +134,148 @@ spring.main.banner-mode=off
 * 设置兜底banner springApplication.setBanner()
 * 关闭banner  设置spring.main.banner-mode=off
 
+
+
+
+
+# 获取Banner
+
+启动类
+
+```java
+package com.example.sb2;
+
+import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.boot.ResourceBanner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.io.ClassPathResource;
+
+@SpringBootApplication
+@MapperScan("com.example.sb2.mapper")
+public class Sb2Application {
+
+   public static void main(String[] args) {
+      SpringApplication.run(Sb2Application.class, args);
+
+//    第二种自定义初始化器
+//    SpringApplication springApplication = new SpringApplication(Sb2Application.class);
+//    springApplication.addInitializers(new SecondInitializer());
+//    springApplication.run(args);
+
+//    // 自定义监听器
+//    SpringApplication springApplication = new SpringApplication(Sb2Application.class);
+//    springApplication.addListeners(new SecondListener());
+//    springApplication.run(args);
+
+
+//    自定义加载banner
+//    SpringApplication springApplication = new SpringApplication(Sb2Application.class);
+//    springApplication.setBanner(new ResourceBanner(new ClassPathResource("banner_bak.txt")));
+//    springApplication.run(args);
+   }
+
+}
+```
+
+
+
+```java
+/**
+ * Run the Spring application, creating and refreshing a new
+ * {@link ApplicationContext}.
+ * @param args the application arguments (usually passed from a Java main method)
+ * @return a running {@link ApplicationContext}
+ */
+public ConfigurableApplicationContext run(String... args) {
+   StopWatch stopWatch = new StopWatch();
+   stopWatch.start();
+   ConfigurableApplicationContext context = null;
+   Collection<SpringBootExceptionReporter> exceptionReporters = new ArrayList<>();
+   configureHeadlessProperty();
+   SpringApplicationRunListeners listeners = getRunListeners(args);
+   listeners.starting();
+   try {
+      ApplicationArguments applicationArguments = new DefaultApplicationArguments(args);
+      ConfigurableEnvironment environment = prepareEnvironment(listeners, applicationArguments);
+      configureIgnoreBeanInfo(environment);
+      // 关注这里
+      Banner printedBanner = printBanner(environment);
+      context = createApplicationContext();
+      exceptionReporters = getSpringFactoriesInstances(SpringBootExceptionReporter.class,
+            new Class[] { ConfigurableApplicationContext.class }, context);
+      prepareContext(context, environment, listeners, applicationArguments, printedBanner);
+      refreshContext(context);
+      afterRefresh(context, applicationArguments);
+      stopWatch.stop();
+      if (this.logStartupInfo) {
+         new StartupInfoLogger(this.mainApplicationClass).logStarted(getApplicationLog(), stopWatch);
+      }
+      listeners.started(context);
+      callRunners(context, applicationArguments);
+   }
+   catch (Throwable ex) {
+      handleRunFailure(context, ex, exceptionReporters, listeners);
+      throw new IllegalStateException(ex);
+   }
+
+   try {
+      listeners.running(context);
+   }
+   catch (Throwable ex) {
+      handleRunFailure(context, ex, exceptionReporters, null);
+      throw new IllegalStateException(ex);
+   }
+   return context;
+}
+```
+
+
+
+printBanner
+
+```java
+private Banner printBanner(ConfigurableEnvironment environment) {
+   if (this.bannerMode == Banner.Mode.OFF) {
+      return null;
+   }
+   ResourceLoader resourceLoader = (this.resourceLoader != null) ? this.resourceLoader
+         : new DefaultResourceLoader(null);
+   SpringApplicationBannerPrinter bannerPrinter = new SpringApplicationBannerPrinter(resourceLoader, this.banner);
+   if (this.bannerMode == Mode.LOG) {
+      return bannerPrinter.print(environment, this.mainApplicationClass, logger);
+   }
+   return bannerPrinter.print(environment, this.mainApplicationClass, System.out);
+}
+```
+
+
+
+```java
+Banner print(Environment environment, Class<?> sourceClass, PrintStream out) {
+   Banner banner = getBanner(environment);
+   banner.printBanner(environment, sourceClass, out);
+   return new PrintedBanner(banner, sourceClass);
+}
+```
+
+
+
+
+
+输出banner逻辑: 获取banner  打印banner
+
+
+
+![](/51.png)
+
+
+
+
+
+# Banner内容输出原理解析
+
+
+
+# 总结
+
