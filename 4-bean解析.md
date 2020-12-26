@@ -2089,3 +2089,90 @@ reFresh是spring容器的一个核心方法
 
 # Bean实例化解析
 
+finishBeanFactoryInitialization里面
+
+```
+preInstantiateSingletons
+```
+
+
+
+新建一个worker对象
+
+
+
+```java
+package com.example.sb2.ioc.ann;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class Worker {
+    private String name;
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
+
+
+
+跟踪
+
+
+
+## BeanDefinition介绍
+
+* 一个对象在Spring中描述，RootBeanDefinition是其常见实现
+* 通过操作BeanDefinition来完成bean实例化和属性注入
+
+
+
+## BeanDefinition类图
+
+![](/48.png)
+
+
+
+## 实例化流程
+
+
+
+![](/49.png)
+
+
+
+# 总结
+
+https://www.cnblogs.com/hetutu-5238/p/12394806.html
+
+ioc相比传统模式带来的提效
+
+xml与注解两种配置bean方式的对比
+
+refresh方法流程
+
+bean实例化步骤
+
+# 面试题
+
+介绍一下ioc思想
+
+springboot 中 bean有哪几种配置方式分别介绍一下
+
+bean的配置你最喜欢哪种方式
+
+介绍一下refresh方法流程
+
+请介绍一下refresh中你比较熟悉的方法说出其作用
+
+介绍一下bean实例化的流程
+
+说几个bean实例化的扩展点及其作用
+
