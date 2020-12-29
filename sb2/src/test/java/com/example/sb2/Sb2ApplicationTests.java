@@ -22,17 +22,17 @@ import org.springframework.test.context.web.WebAppConfiguration;
 //@ContextConfiguration(locations = "classpath:ioc/demo.xml")
 public class Sb2ApplicationTests {
 
-    @Autowired
-    private HelloService helloService;
-
-
-    @Test
-    public void contextLoads() {
-
-    }
-
-    @Autowired
-    private Teacher teacher;
+//    @Autowired
+//    private HelloService helloService;
+//
+//
+//    @Test
+//    public void contextLoads() {
+//
+//    }
+//
+//    @Autowired
+//    private Teacher teacher;
 //
 //    @Test
 //    public void testHello() {
@@ -40,10 +40,10 @@ public class Sb2ApplicationTests {
 //        System.out.println(helloService.hello2());
 //    }
 
-    @Test
-    public void testName() {
-        System.out.println(teacher.getName());
-    }
+//    @Test
+//    public void testName() {
+//        System.out.println(teacher.getName());
+//    }
 
 
 

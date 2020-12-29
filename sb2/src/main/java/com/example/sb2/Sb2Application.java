@@ -4,15 +4,19 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.ResourceBanner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StopWatch;
 
+import java.util.Properties;
+
 @SpringBootApplication
 @MapperScan("com.example.sb2.mapper")
+@PropertySource({"demo.properties"})
 public class Sb2Application {
 
 	public static void main(String[] args) throws InterruptedException {
-		SpringApplication.run(Sb2Application.class, args);
+//		SpringApplication.run(Sb2Application.class, args);
 
 //		第二种自定义初始化器
 //		SpringApplication springApplication = new SpringApplication(Sb2Application.class);
@@ -48,6 +52,13 @@ public class Sb2Application {
 //
 //		System.out.println(myWatch.prettyPrint());
 
+
+//		属性配置解析
+   		SpringApplication springApplication = new SpringApplication(Sb2Application.class);
+		Properties properties = new Properties();
+		properties.setProperty("sb2.website.url", "test1");
+		springApplication.setDefaultProperties(properties);
+		springApplication.run(args);
 
 	}
 
