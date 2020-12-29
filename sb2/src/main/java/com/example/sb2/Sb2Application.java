@@ -1,5 +1,8 @@
 package com.example.sb2;
 
+import com.example.sb2.except.AException;
+import com.example.sb2.except.BException;
+import com.example.sb2.except.CException;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.ResourceBanner;
 import org.springframework.boot.SpringApplication;
@@ -16,7 +19,18 @@ import java.util.Properties;
 public class Sb2Application {
 
 	public static void main(String[] args) throws InterruptedException {
-//		SpringApplication.run(Sb2Application.class, args);
+		SpringApplication.run(Sb2Application.class, args);
+
+//		异常报告处理类
+//		try {
+//			throw new CException(new BException(new AException(new Exception("test"))));
+//		} catch (Throwable t) {
+//			while ( t != null ){
+//				System.out.println(t.getClass());
+//				t = t.getCause();
+//			}
+//		}
+
 
 //		第二种自定义初始化器
 //		SpringApplication springApplication = new SpringApplication(Sb2Application.class);
@@ -54,11 +68,11 @@ public class Sb2Application {
 
 
 //		属性配置解析
-   		SpringApplication springApplication = new SpringApplication(Sb2Application.class);
-		Properties properties = new Properties();
-		properties.setProperty("sb2.website.url", "test1");
-		springApplication.setDefaultProperties(properties);
-		springApplication.run(args);
+//   		SpringApplication springApplication = new SpringApplication(Sb2Application.class);
+//		Properties properties = new Properties();
+//		properties.setProperty("sb2.website.url", "test1");
+//		springApplication.setDefaultProperties(properties);
+//		springApplication.run(args);
 
 	}
 
