@@ -19,7 +19,7 @@ import java.util.Properties;
 public class Sb2Application {
 
 	public static void main(String[] args) throws InterruptedException {
-		SpringApplication.run(Sb2Application.class, args);
+ 		SpringApplication.run(Sb2Application.class, args);
 
 //		异常报告处理类
 //		try {
